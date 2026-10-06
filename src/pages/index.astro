@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import PixelMark from '../components/PixelMark.astro';
+import AppCard from '../components/AppCard.astro';
+import SupportCTA from '../components/SupportCTA.astro';
+import { apps } from '../data/apps';
+import { SITE } from '../data/site';
+---
+<Base>
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="hero-bg" aria-hidden="true">
+      <i class="sq s1"></i><i class="sq s2"></i><i class="sq s3"></i><i class="sq s4"></i><i class="sq s5"></i><i class="sq s6"></i>
+    </div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow reveal" style="--i:0">APP LAB <span>/ 01</span></p>
+        <h1 id="hero-h" class="reveal" style="--i:1">Small apps.<br />Useful ideas.</h1>
+        <p class="lede reveal" style="--i:2">DIJULABS is a small digital lab where ideas become apps, tools, and experiments worth sharing.</p>
+        <div class="cta-row reveal" style="--i:3">
+          <a class="btn btn-dark" href="#lab">EXPLORE THE APPS <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn btn-ghost" href={SITE.supportUrl} rel="noopener" target="_blank">
+            <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.7 4.5 6.4 4.5c2.1 0 3.6 1.2 4.6 2.6l1 1.4 1-1.4c1-1.4 2.5-2.6 4.6-2.6 3.7 0 5.500 3.900 4 7.300C19.500 16.400 12 21 12 21z"/></svg>
+            SUPPORT DIJULABS
+          </a>
+        </div>
+        <p class="coords mono tiny reveal" style="--i:4" aria-hidden="true">+ 43.1234° N<br />− 111.5678° W</p>
+      </div>
+      <div class="hero-visual">
+        <PixelMark animated class="hero-mark" label="DIJULABS pixel mark" />
+      </div>
+    </div>
+  </section>
+
+  <section id="lab" class="lab wrap" aria-labelledby="lab-h">
+    <p class="eyebrow reveal">THE LAB</p>
+    <h2 id="lab-h" class="reveal">A collection of apps, experiments,<br class="br-md" /> and ideas currently taking shape.</h2>
+    <div class="cards">
+      {apps.map((app, i) => <AppCard app={app} index={i} />)}
+    </div>
+  </section>
+
+  <SupportCTA />
+
+  <section id="about" class="about wrap reveal" aria-labelledby="about-h">
+    <p class="eyebrow">ABOUT</p>
+    <h2 id="about-h">Why DIJULABS?</h2>
+    <div class="about-copy">
+      <p class="about-lead">Sometimes an idea is easier to build than to explain.<br />DIJULABS is where I turn those ideas into real things.</p>
+      <p>I'm an independent maker who likes tinkering with software, hunting down the little everyday problems, and building small, useful tools to solve them. Some become apps I rely on every day. Some stay experiments. They all start the same way: <em>what if this just worked better?</em></p>
+      <p class="sign">{SITE.maker}</p>
+    </div>
+  </section>
+</Base>

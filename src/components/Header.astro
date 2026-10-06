@@ -1,0 +1,43 @@
+---
+import wordmark from '../assets/wordmark.png';
+import { Image } from 'astro:assets';
+import PixelMark from './PixelMark.astro';
+import { SITE } from '../data/site';
+---
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="/" aria-label="DIJULABS home">
+      <PixelMark class="brand-mark" />
+      <Image class="brand-word" src={wordmark} alt="" width={640} height={76} widths={[160, 320]} sizes="140px" loading="eager" />
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="/#lab">APPS</a>
+      <a href="/#about">ABOUT</a>
+    </nav>
+    <a class="btn btn-ghost btn-sm support-link" href={SITE.supportUrl} rel="noopener" target="_blank">
+      <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.7 4.5 6.4 4.5c2.1 0 3.6 1.2 4.6 2.6l1 1.4 1-1.4c1-1.4 2.5-2.6 4.6-2.6 3.7 0 5.5 3.9 4 7.3C19.500 16.400 12 21 12 21z"/></svg>
+      <span>SUPPORT DIJULABS</span>
+    </a>
+    <button class="menu-btn" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+      <span></span><span></span>
+    </button>
+  </div>
+  <div id="mobile-menu" class="mobile-menu" hidden>
+    <a href="/#lab">APPS</a>
+    <a href="/#about">ABOUT</a>
+    <a href={SITE.supportUrl} rel="noopener" target="_blank">SUPPORT DIJULABS</a>
+  </div>
+</header>
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const set = (open: boolean) => {
+    if (!btn || !menu) return;
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    menu.hidden = !open;
+  };
+  btn?.addEventListener('click', () => set(btn.getAttribute('aria-expanded') !== 'true'));
+  menu?.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a')) set(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') set(false); });
+</script>

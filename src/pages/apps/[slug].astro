@@ -1,0 +1,60 @@
+---
+import Base from '../../layouts/Base.astro';
+import AppStatus from '../../components/AppStatus.astro';
+import AppScreenshotGallery from '../../components/AppScreenshotGallery.astro';
+import InstallButton from '../../components/InstallButton.astro';
+import SupportCTA from '../../components/SupportCTA.astro';
+import { apps, appNumber, type App } from '../../data/apps';
+import { SITE } from '../../data/site';
+
+export function getStaticPaths() {
+  return apps.map((app) => ({ params: { slug: app.slug }, props: { app } }));
+}
+const { app } = Astro.props as { app: App };
+---
+<Base
+  title={`${app.name} — ${app.tagline} | DIJULABS`}
+  description={`${app.name}: ${app.description}`}
+  image={`/og/${app.slug}.png`}
+  path={`/apps/${app.slug}`}
+>
+  <section class="detail wrap">
+    <a class="back mono tiny reveal" href="/#lab"><span aria-hidden="true">←</span> BACK TO APPS</a>
+    <div class="detail-head">
+      <div class="detail-copy">
+        <div class="detail-status reveal" style="--i:0"><AppStatus status={app.status} /><span class="mono tiny">DIJU / APP {appNumber(app.slug)}</span></div>
+        <h1 class="reveal" style="--i:1">{app.name}</h1>
+        <p class="detail-tag reveal" style="--i:2">{app.tagline}</p>
+        <p class="lede reveal" style="--i:3">{app.description}</p>
+        <p class="meta mono tiny reveal" style="--i:4">
+          {app.platforms && <span>{app.platforms}</span>}
+          {app.version && <span>v{app.version}</span>}
+        </p>
+        <div class="reveal" style="--i:5"><InstallButton app={app} /></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shots wrap" aria-label={`${app.name} screenshots`}>
+    <AppScreenshotGallery app={app} />
+  </section>
+
+  {app.features && (
+    <section class="features wrap reveal" aria-labelledby="features-h">
+      <h2 id="features-h" class="eyebrow">FEATURES</h2>
+      <ul>{app.features.map((f) => <li>{f}</li>)}</ul>
+    </section>
+  )}
+
+  {app.why && (
+    <section class="why wrap reveal" aria-labelledby="why-h">
+      <div class="why-card">
+        <h2 id="why-h">Why I built {app.name}</h2>
+        <p>{app.why}</p>
+        <p class="sign">{SITE.maker}</p>
+      </div>
+    </section>
+  )}
+
+  <SupportCTA />
+</Base>

@@ -1,0 +1,9 @@
+---
+import type { AppStatus } from '../data/apps';
+interface Props { status: AppStatus }
+const { status } = Astro.props;
+const label: Record<AppStatus, string> = {
+  live: 'LIVE', beta: 'BETA', 'in-development': 'IN DEVELOPMENT', 'coming-soon': 'COMING SOON',
+};
+---
+<span class={`status status-${status}`}><span class="status-dot" aria-hidden="true"></span>{label[status]}</span>

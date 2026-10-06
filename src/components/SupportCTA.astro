@@ -1,0 +1,27 @@
+---
+import { SITE } from '../data/site';
+---
+<section class="support wrap reveal" aria-labelledby="support-h">
+  <div class="support-card">
+    <svg class="support-peaks" viewBox="0 0 600 260" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e7da" stop-opacity="0"/><stop offset="1" stop-color="#f3d9c6" stop-opacity=".7"/></linearGradient>
+      </defs>
+      <rect width="600" height="260" fill="url(#sky)"/>
+      <polygon points="120,260 300,70 360,130 430,40 600,200 600,260" fill="#c9ced6"/>
+      <polygon points="430,40 470,95 445,90 430,115 410,85 395,95" fill="#fff" opacity=".9"/>
+      <polygon points="300,70 330,105 312,100 300,120 285,98 270,108" fill="#fff" opacity=".85"/>
+      <polygon points="200,260 380,150 470,210 600,130 600,260" fill="#8d96a3"/>
+      <polygon points="0,260 150,190 260,240 380,200 520,250 600,230 600,260" fill="#4b5563"/>
+    </svg>
+    <div class="support-body">
+      <p class="eyebrow">SUPPORT</p>
+      <h2 id="support-h">Like what I'm building?</h2>
+      <p>DIJULABS is a small workshop for ideas, experiments, and apps. If something I've built is useful to you, you can help me keep building.</p>
+      <a class="btn btn-dark" href={SITE.supportUrl} rel="noopener" target="_blank">
+        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.7 4.5 6.4 4.5c2.1 0 3.600 1.200 4.600 2.600l1 1.400 1-1.400c1-1.400 2.500-2.600 4.600-2.600 3.700 0 5.500 3.900 4 7.300C19.500 16.400 12 21 12 21z"/></svg>
+        SUPPORT DIJULABS
+      </a>
+    </div>
+  </div>
+</section>
