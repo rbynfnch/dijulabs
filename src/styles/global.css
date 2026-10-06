@@ -183,12 +183,12 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- support ---------- */
 .support { margin-top: 72px; }
-.support-card { position: relative; overflow: hidden; border-radius: 18px; background: linear-gradient(120deg, #f4f1ec, #f7f3ee 55%, #efe6dc); border: 1px solid var(--line); padding: 32px 24px 150px; }
-.support-peaks { position: absolute; right: 0; bottom: 0; width: 100%; height: 150px; opacity: 0.9; }
+.support-card { position: relative; isolation: isolate; overflow: hidden; border-radius: 18px; background: linear-gradient(120deg, #f4f1ec, #f7f3ee 55%, #efe6dc); border: 1px solid var(--line); padding: 32px 24px 250px; }
+.support-photo { position: absolute; right: 0; bottom: 0; width: 100%; height: 235px; object-fit: cover; object-position: 82% center; mix-blend-mode: multiply; filter: brightness(1.04); z-index: -1; pointer-events: none; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 28%); mask-image: linear-gradient(to bottom, transparent, #000 28%); }
 .support-body { position: relative; max-width: 28rem; }
 .support-body h2 { font-size: clamp(1.5rem, 4.5vw, 2rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
 .support-body p:not(.eyebrow) { margin: 12px 0 22px; color: var(--ink-2); font-size: 0.95rem; }
-@media (min-width: 768px) { .support-card { padding: 48px 48px; min-height: 280px; } .support-peaks { width: 62%; height: 100%; } }
+@media (min-width: 768px) { .support-card { padding: 56px 48px; min-height: 360px; } .support-photo { width: 72%; height: 100%; object-position: right center; -webkit-mask-image: none; mask-image: none; } }
 
 /* ---------- about ---------- */
 .about { padding-top: 80px; }
