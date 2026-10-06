@@ -1,0 +1,44 @@
+---
+// The DIJULABS pixel mark, rendered from the sampled logo grid so each pixel can be animated.
+import grid from '../data/logo-grid.json';
+interface Props { animated?: boolean; class?: string; label?: string }
+const { animated = false, class: cls = '', label } = Astro.props;
+
+const R = grid.length, C = grid[0].length;
+// deterministic pseudo-random so the markup is stable between builds
+const rnd = (n: number) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const cells = grid.flatMap((row, r) =>
+  row.map((fill, c) => {
+    if (!fill) return null;
+    const i = r * C + c;
+    const dist = Math.hypot(c / C, (R - 1 - r) / R); // 0 at lower-left -> ~1.4 at upper-right
+    const kind = rnd(i + 3) > 0.9 ? 'drift' : rnd(i + 9) > 0.86 ? 'blink' : rnd(i + 5) > 0.5 ? 'twinkle' : 'still';
+    return {
+      x: c, y: r, fill: '#' + fill, kind,
+      inDelay: (dist * 0.9).toFixed(2),
+      dur: (6 + rnd(i) * 9).toFixed(1),
+      off: (rnd(i + 1) * -12).toFixed(1),
+      dx: ((rnd(i + 2) - 0.5) * 0.5).toFixed(2),
+      dy: ((rnd(i + 4) - 0.5) * 0.5).toFixed(2),
+    };
+  }).filter(Boolean)
+);
+---
+<svg
+  class={`pixel-mark ${animated ? 'is-animated' : ''} ${cls}`}
+  viewBox={`0 0 ${C} ${R}`}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+  shape-rendering="crispEdges"
+>
+  {cells.map((p) => (
+    <rect
+      x={p!.x} y={p!.y} width="0.94" height="0.94" fill={p!.fill}
+      class={animated ? `px px-${p!.kind}` : undefined}
+      style={animated ? `--in:${p!.inDelay}s;--d:${p!.dur}s;--o:${p!.off}s;--dx:${p!.dx}px;--dy:${p!.dy}px` : undefined}
+    />
+  ))}
+</svg>

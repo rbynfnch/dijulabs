@@ -1,0 +1,16 @@
+---
+import type { App } from '../data/apps';
+interface Props { app: App }
+const { app } = Astro.props;
+const shots = app.screenshots.slice(0, 4);
+---
+<div class="gallery" role="region" aria-label={`${app.name} screenshots`} tabindex="0">
+  {shots.map((s, i) => (
+    <figure class={`phone phone-${i}`}>
+      <div class="phone-body">
+        <span class="phone-notch" aria-hidden="true"></span>
+        <img src={s.src} alt={s.alt} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" width="390" height="844" />
+      </div>
+    </figure>
+  ))}
+</div>

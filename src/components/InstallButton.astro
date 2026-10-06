@@ -1,0 +1,162 @@
+---
+// Reusable install button. mode="handoff" (default): the app lives on another origin (e.g. Netlify), so we
+// send people to it, where the browser's real install prompt can fire. mode="native": use this component
+// on the app's own page; it drives the real beforeinstallprompt / appinstalled flow.
+import type { App } from '../data/apps';
+interface Props { app: App; mode?: 'handoff' | 'native' }
+const { app, mode = 'handoff' } = Astro.props;
+const NAME = app.name.toUpperCase();
+---
+<div
+  class="install"
+  data-diju-install
+  data-mode={mode}
+  data-name={NAME}
+  data-url={app.url ?? ''}
+  data-installable={String(app.installable)}
+  data-state="idle"
+>
+  <div class="install-icon" style="--p:0">
+    <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <linearGradient id={`ring-${app.slug}`} x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stop-color="#1c2530" /><stop offset=".35" stop-color="#7b4ab0" />
+          <stop offset=".6" stop-color="#e8365a" /><stop offset=".8" stop-color="#ff9a1f" /><stop offset="1" stop-color="#1fb5a7" />
+        </linearGradient>
+      </defs>
+      <circle class="ring-track" cx="50" cy="50" r="46" />
+      <circle class="ring-bar" cx="50" cy="50" r="46" stroke={`url(#ring-${app.slug})`} />
+    </svg>
+    <img src={`/apps/${app.slug}/icon.png`} alt="" width="96" height="96" loading="lazy" decoding="async" />
+    <span class="ring-pct mono" aria-hidden="true"></span>
+  </div>
+  <div class="install-actions">
+    <button type="button" class="btn btn-dark btn-lg install-btn" disabled={!app.installable}>
+      <span class="install-label">{app.installable ? `INSTALL ${NAME}` : 'COMING SOON'}</span>
+    </button>
+    <a class="btn btn-ghost btn-lg install-open" href={app.url} hidden rel="noopener">OPEN {NAME} →</a>
+    <p class="install-note" role="status" aria-live="polite">
+      {app.installable ? 'Works on most modern browsers.' : 'Not installable yet. Check back soon.'}
+    </p>
+    <div class="install-help" hidden></div>
+  </div>
+</div>
+
+<script>
+  type State = 'idle' | 'preparing' | 'installing' | 'installed' | 'open' | 'ios';
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isStandalone =
+    matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
+  let deferred: any = null;
+  const roots = document.querySelectorAll<HTMLElement>('[data-diju-install]');
+
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; });
+
+  roots.forEach((root) => {
+    const mode = root.dataset.mode;
+    const name = root.dataset.name || 'APP';
+    const url = root.dataset.url || '';
+    const installable = root.dataset.installable === 'true';
+    const btn = root.querySelector<HTMLButtonElement>('.install-btn')!;
+    const label = root.querySelector<HTMLElement>('.install-label')!;
+    const note = root.querySelector<HTMLElement>('.install-note')!;
+    const help = root.querySelector<HTMLElement>('.install-help')!;
+    const open = root.querySelector<HTMLAnchorElement>('.install-open')!;
+    const icon = root.querySelector<HTMLElement>('.install-icon')!;
+    const pct = root.querySelector<HTMLElement>('.ring-pct')!;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!installable) return;
+
+    let p = 0, raf = 0;
+    const setP = (v: number) => {
+      p = v;
+      icon.style.setProperty('--p', String(v));
+      pct.textContent = v > 0 && v < 1 ? Math.round(v * 100) + '%' : v >= 1 ? '100%' : '';
+    };
+    const stopSim = () => cancelAnimationFrame(raf);
+    // Simulated progress: eases toward `cap` and never reaches 100% on its own.
+    const sim = (cap: number) => {
+      stopSim();
+      const tick = () => { setP(p + (cap - p) * (reduce ? 0.3 : 0.025)); raf = requestAnimationFrame(tick); };
+      tick();
+    };
+    const set = (s: State, text: string, msg?: string) => {
+      root.dataset.state = s;
+      label.textContent = text;
+      if (msg !== undefined) note.textContent = msg;
+    };
+    const showOpen = () => { btn.hidden = true; open.hidden = false; };
+    const iosHelp = () => {
+      help.hidden = false;
+      help.innerHTML = `<strong>Install on iPhone or iPad</strong><ol><li>Open ${name.toLowerCase().replace(/^./, (c) => c.toUpperCase())} in Safari.</li><li>Tap <b>Share</b> <span aria-hidden="true">⬆︎</span>, then <b>Add to Home Screen</b>.</li></ol>`;
+    };
+    const manualHelp = () => {
+      help.hidden = false;
+      help.innerHTML = `<strong>Install manually</strong><ol><li>Open your browser menu (⋮ or ⋯).</li><li>Choose <b>Install app</b> or <b>Add to Home screen</b>.</li></ol>`;
+    };
+
+    const markInstalled = () => {
+      stopSim(); setP(1);
+      set('installed', 'INSTALLED ✓', `${name.charAt(0) + name.slice(1).toLowerCase()} was added to your device.`);
+      setTimeout(() => { setP(0); set('open', `OPEN ${name} →`); if (url) showOpen(); }, 1400);
+    };
+    window.addEventListener('appinstalled', markInstalled);
+
+    // ---- handoff: app lives on another origin, so take people there for the real install prompt
+    if (mode === 'handoff') {
+      if (isIOS) {
+        set('ios', 'ADD TO HOME SCREEN', 'iOS installs from Safari’s Share menu.');
+        btn.addEventListener('click', () => { iosHelp(); if (url) { open.hidden = false; open.textContent = `OPEN ${name} IN SAFARI →`; } });
+        return;
+      }
+      btn.addEventListener('click', () => {
+        if (!url) return;
+        btn.disabled = true;
+        set('preparing', 'PREPARING…', `Opening ${name.charAt(0) + name.slice(1).toLowerCase()}, where your browser can offer to install it.`);
+        sim(1);
+        setTimeout(() => { location.href = url + (url.includes('?') ? '&' : '?') + 'install=1'; }, reduce ? 200 : 900);
+      });
+      // coming back via bfcache: reset
+      addEventListener('pageshow', (e) => { if ((e as PageTransitionEvent).persisted) { stopSim(); setP(0); btn.disabled = false; set('idle', `INSTALL ${name}`, 'Works on most modern browsers.'); } });
+      return;
+    }
+
+    // ---- native: on the app's own page, use the real prompt
+    if (isStandalone) { root.hidden = true; return; }
+    const navAny = navigator as any;
+    if (navAny.getInstalledRelatedApps) {
+      navAny.getInstalledRelatedApps().then((list: any[]) => { if (list.length) { set('open', `OPEN ${name} →`, 'Already installed on this device.'); if (url) showOpen(); } }).catch(() => {});
+    }
+    set('preparing', 'PREPARING…');
+    btn.disabled = true;
+    const ready = () => { btn.disabled = false; set('idle', `INSTALL ${name}`, 'One tap, and your browser handles the rest.'); };
+    const fallback = () => {
+      if (deferred) return ready();
+      if (isIOS) { set('ios', 'ADD TO HOME SCREEN', 'iOS installs from Safari’s Share menu.'); btn.disabled = false; btn.onclick = iosHelp; }
+      else { set('idle', 'ADD TO HOME SCREEN', 'This browser doesn’t offer one-tap install.'); btn.disabled = false; btn.onclick = manualHelp; }
+    };
+    if (deferred) ready(); else { window.addEventListener('beforeinstallprompt', ready, { once: true }); setTimeout(fallback, 2000); }
+
+    btn.addEventListener('click', async () => {
+      if (!deferred) return;
+      const evt = deferred; deferred = null;
+      btn.disabled = true;
+      set('installing', 'INSTALLING…', 'Confirm in your browser’s install dialog.');
+      sim(0.9);
+      try {
+        await evt.prompt();
+        const { outcome } = await evt.userChoice;
+        if (outcome === 'dismissed') {
+          // a prompt event can only be used once; fall back to the browser menu
+          stopSim(); setP(0); set('idle', 'ADD TO HOME SCREEN', 'No problem. You can install any time from your browser menu.');
+          btn.disabled = false; btn.onclick = manualHelp; return;
+        }
+        // accepted: wait for the real `appinstalled` event; never claim success before it
+        setTimeout(() => {
+          if (root.dataset.state === 'installing') { stopSim(); setP(0); set('open', `OPEN ${name} →`, 'Install accepted. Look for it on your home screen or app list.'); if (url) showOpen(); }
+        }, 8000);
+      } catch { stopSim(); setP(0); set('idle', `INSTALL ${name}`, 'Install didn’t start. Try your browser menu instead.'); btn.disabled = false; manualHelp(); }
+    });
+  });
+</script>

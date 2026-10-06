@@ -1,0 +1,15 @@
+---
+import PixelMark from './PixelMark.astro';
+import { SITE } from '../data/site';
+---
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <a class="brand" href="/" aria-label="DIJULABS home"><PixelMark class="brand-mark" /><span class="footer-name">DIJULABS</span></a>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="/#lab">APPS</a>
+      <a href="/#about">ABOUT</a>
+      <a href={SITE.supportUrl} rel="noopener" target="_blank">SUPPORT</a>
+    </nav>
+    <p class="footer-fine">DIJULABS © {SITE.year}<br /><span>Built somewhere in Wyoming.</span></p>
+  </div>
+</footer>

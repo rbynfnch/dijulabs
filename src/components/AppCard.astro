@@ -1,0 +1,25 @@
+---
+import type { App } from '../data/apps';
+import { appNumber } from '../data/apps';
+import AppStatus from './AppStatus.astro';
+interface Props { app: App; index?: number }
+const { app, index = 0 } = Astro.props;
+const shots = app.screenshots.slice(0, 2);
+---
+<article class="card reveal" style={`--i:${index}`}>
+  <div class="card-top">
+    <AppStatus status={app.status} />
+    <span class="mono tiny">DIJU / APP {appNumber(app.slug)}</span>
+  </div>
+  <h3>{app.name}</h3>
+  <p class="card-tag">{app.tagline}</p>
+  <p class="card-desc">{app.description}</p>
+  <div class="card-shots" aria-hidden="true">
+    {shots.map((s, i) => (
+      <div class={`mini-phone mini-${i}`}><img src={s.src} alt="" loading="lazy" decoding="async" width="390" height="844" /></div>
+    ))}
+  </div>
+  <a class="card-link" href={`/apps/${app.slug}`} aria-label={`View ${app.name}`}>
+    VIEW APP <span class="arrow" aria-hidden="true">→</span>
+  </a>
+</article>
